@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from hyundai_kia_connect_api import VehicleManager
-from hyundai_kia_connect_api.const import Region, Brand
 
 app = Flask(__name__)
 
@@ -29,9 +28,10 @@ def get_soc():
         if cache_key in vm_cache:
             vm = vm_cache[cache_key]
         else:
+            # region 1 = Europe, brand 1 = Kia
             vm = VehicleManager(
-                region=Region.EUROPE,
-                brand=Brand.KIA,
+                region=1,
+                brand=1,
                 username=username,
                 password=password,
                 pin=pin
