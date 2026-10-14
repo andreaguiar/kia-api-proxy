@@ -15,11 +15,12 @@ def ping():
 def get_soc():
     data = request.json
     username = data.get('username')
-    password = data.get('password')
+    # Fetch the token from the incoming request payload
+    refresh_token = data.get('refresh_token')
     pin = data.get('pin', '') # Optional for Kia Europe just to read data
 
-    if not username or not password:
-        return jsonify({"error": "Missing credentials"}), 400
+    if not username or not refresh_token:
+        return jsonify({"error": "Missing credentials. Please provide username and refresh_token."}), 400
 
     try:
         cache_key = f"{username}"
@@ -28,12 +29,12 @@ def get_soc():
         if cache_key in vm_cache:
             vm = vm_cache[cache_key]
         else:
-            # region 1 = Europe, brand 1 = Kia
+            # FIX: We now pass 'refresh_token' instead of 'password' to VehicleManager
             vm = VehicleManager(
                 region=1,
                 brand=1,
                 username=username,
-                password=password,
+                refresh_token=refresh_token,
                 pin=pin
             )
             vm_cache[cache_key] = vm
@@ -61,7 +62,7 @@ def get_soc():
         })
         
     except Exception as e:
-        # If there's an error (like a bad password), clear the cache
+        # If there's an error (like a bad token), clear the cache
         if username in vm_cache:
             del vm_cache[username]
         return jsonify({"error": str(e)}), 500
